@@ -1,0 +1,541 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Grand Plaza Hotel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .register-container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 2rem;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+    
+    .register-container h2 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group input.valid {
+      border-color: #28a745;
+    }
+    
+    .form-group input.invalid {
+      border-color: #dc3545;
+    }
+    
+    .password-requirements {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .requirement {
+      display: flex;
+      align-items: center;
+      margin: 0.2rem 0;
+    }
+    
+    .requirement.valid {
+      color: #28a745;
+    }
+    
+    .requirement.invalid {
+      color: #dc3545;
+    }
+    
+    .requirement-icon {
+      margin-right: 0.5rem;
+      font-weight: bold;
+    }
+    
+    .error-message {
+      color: #dc3545;
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    
+    .field-required {
+      color: #dc3545;
+      font-size: 0.8rem;
+    }
+    
+    .register-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 1.5rem;
+    }
+    
+    .register-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .register-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .divider {
+      margin: 1.5rem 0;
+      text-align: center;
+      position: relative;
+      color: #999;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e1e5e9;
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 1rem;
+    }
+    
+    .signin-link {
+      text-align: center;
+    }
+    
+    .signin-link p {
+      color: #666;
+      margin-bottom: 1rem;
+    }
+    
+    .signin-btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .signin-btn:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .back-home {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    
+    .back-home a {
+      color: #999;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    
+    .back-home a:hover {
+      color: #667eea;
+    }
+    
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="logo">🏨</div>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join Grand Plaza Hotel for exclusive benefits</p>
+    
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="name">Full Name <span class="field-required">*</span></label>
+        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+        <div class="error-message" id="nameError">Please enter your full name</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address <span class="field-required">*</span></label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        <div class="error-message" id="emailError">Please enter a valid email address</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number <span class="field-required">*</span></label>
+        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+        <div class="error-message" id="phoneError">Please enter your phone number</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password <span class="field-required">*</span></label>
+        <input type="password" id="password" name="password" placeholder="Create a password" required>
+        <div class="password-requirements">
+          <div class="requirement" id="lengthReq">
+            <span class="requirement-icon">✗</span>
+            At least 8 characters
+          </div>
+          <div class="requirement" id="letterReq">
+            <span class="requirement-icon">✗</span>
+            Contains letters
+          </div>
+          <div class="requirement" id="numberReq">
+            <span class="requirement-icon">✗</span>
+            Contains numbers
+          </div>
+        </div>
+        <div class="error-message" id="passwordError">Password must meet all requirements</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password <span class="field-required">*</span></label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+        <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+      </div>
+      
+      <button type="submit" class="register-btn" id="submitBtn" disabled>Create Account</button>
+    </form>
+    
+    <div class="divider">
+      <span>or</span>
+    </div>
+    
+    <div class="signin-link">
+      <p>Already have an account?</p>
+      <a href="login.html" class="signin-btn">Sign In</a>
+    </div>
+    
+    <div class="back-home">
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+  <script>
+    // Form validation variables
+    let isFormValid = false;
+    let validations = {
+      name: false,
+      email: false,
+      phone: false,
+      password: false,
+      confirmPassword: false
+    };
+    
+    // Track field interaction
+    let fieldInteraction = {
+      name: false,
+      email: false,
+      phone: false,
+      password: false,
+      confirmPassword: false
+    };
+
+    // Get form elements
+    const form = document.getElementById('registerForm');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Password requirements elements
+    const lengthReq = document.getElementById('lengthReq');
+    const letterReq = document.getElementById('letterReq');
+    const numberReq = document.getElementById('numberReq');
+
+    // Add event listeners for real-time validation
+    nameInput.addEventListener('input', () => {
+      fieldInteraction.name = true;
+      validateName();
+    });
+    nameInput.addEventListener('blur', () => {
+      fieldInteraction.name = true;
+      validateName();
+    });
+    
+    emailInput.addEventListener('input', () => {
+      fieldInteraction.email = true;
+      validateEmail();
+    });
+    emailInput.addEventListener('blur', () => {
+      fieldInteraction.email = true;
+      validateEmail();
+    });
+    
+    phoneInput.addEventListener('input', () => {
+      fieldInteraction.phone = true;
+      validatePhone();
+    });
+    phoneInput.addEventListener('blur', () => {
+      fieldInteraction.phone = true;
+      validatePhone();
+    });
+    
+    passwordInput.addEventListener('input', () => {
+      fieldInteraction.password = true;
+      validatePassword();
+    });
+    passwordInput.addEventListener('blur', () => {
+      fieldInteraction.password = true;
+      validatePassword();
+    });
+    
+    confirmPasswordInput.addEventListener('input', () => {
+      fieldInteraction.confirmPassword = true;
+      validateConfirmPassword();
+    });
+    confirmPasswordInput.addEventListener('blur', () => {
+      fieldInteraction.confirmPassword = true;
+      validateConfirmPassword();
+    });
+
+    // Validation functions
+    function validateName() {
+      const value = nameInput.value.trim();
+      const isValid = value.length >= 2;
+      
+      updateFieldValidation('name', isValid, nameInput, 'nameError');
+      return isValid;
+    }
+
+    function validateEmail() {
+      const value = emailInput.value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const isValid = emailRegex.test(value);
+      
+      updateFieldValidation('email', isValid, emailInput, 'emailError');
+      return isValid;
+    }
+
+    function validatePhone() {
+      const value = phoneInput.value.trim();
+      const phoneRegex = /^[\+]?[1-9][\d]{9,15}$/;
+      const isValid = phoneRegex.test(value) && value.length >= 10;
+      
+      updateFieldValidation('phone', isValid, phoneInput, 'phoneError');
+      return isValid;
+    }
+
+    function validatePassword() {
+      const value = passwordInput.value;
+      
+      // Check length (at least 8 characters)
+      const hasLength = value.length >= 8;
+      updateRequirement(lengthReq, hasLength);
+      
+      // Check for letters
+      const hasLetter = /[a-zA-Z]/.test(value);
+      updateRequirement(letterReq, hasLetter);
+      
+      // Check for numbers
+      const hasNumber = /\d/.test(value);
+      updateRequirement(numberReq, hasNumber);
+      
+      const isValid = hasLength && hasLetter && hasNumber;
+      updateFieldValidation('password', isValid, passwordInput, 'passwordError');
+      
+      // Also revalidate confirm password when password changes (but only if user has interacted with it)
+      if (confirmPasswordInput.value && fieldInteraction.confirmPassword) {
+        validateConfirmPassword();
+      }
+      
+      return isValid;
+    }
+
+    function validateConfirmPassword() {
+      const value = confirmPasswordInput.value;
+      const passwordValue = passwordInput.value;
+      const isValid = value === passwordValue && value.length > 0;
+      
+      updateFieldValidation('confirmPassword', isValid, confirmPasswordInput, 'confirmPasswordError');
+      return isValid;
+    }
+
+    function updateRequirement(element, isValid) {
+      const icon = element.querySelector('.requirement-icon');
+      if (isValid) {
+        element.classList.add('valid');
+        element.classList.remove('invalid');
+        icon.textContent = '✓';
+      } else {
+        element.classList.add('invalid');
+        element.classList.remove('valid');
+        icon.textContent = '✗';
+      }
+    }
+
+    function updateFieldValidation(field, isValid, inputElement, errorElementId) {
+      const errorElement = document.getElementById(errorElementId);
+      
+      validations[field] = isValid;
+      
+      if (isValid) {
+        inputElement.classList.add('valid');
+        inputElement.classList.remove('invalid');
+        errorElement.style.display = 'none';
+      } else {
+        inputElement.classList.add('invalid');
+        inputElement.classList.remove('valid');
+        // Only show error if user has interacted with the field
+        if (fieldInteraction[field]) {
+          errorElement.style.display = 'block';
+        } else {
+          errorElement.style.display = 'none';
+        }
+      }
+      
+      updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+      const allValid = Object.values(validations).every(valid => valid);
+      
+      if (allValid) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.textContent = 'Create Account';
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.textContent = 'Complete all fields';
+      }
+    }
+
+    // Form submission with enhanced validation
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Mark all fields as interacted for final validation
+      Object.keys(fieldInteraction).forEach(field => {
+        fieldInteraction[field] = true;
+      });
+      
+      // Final validation check
+      const nameValid = validateName();
+      const emailValid = validateEmail();
+      const phoneValid = validatePhone();
+      const passwordValid = validatePassword();
+      const confirmPasswordValid = validateConfirmPassword();
+      
+      if (!nameValid || !emailValid || !phoneValid || !passwordValid || !confirmPasswordValid) {
+        alert('Please fix all errors before submitting');
+        return;
+      }
+      
+      // Disable button during submission
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Account...';
+      
+      const formData = {
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        password: passwordInput.value
+      };
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/customer/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert('✅ Registration successful! Please login with your credentials.');
+          window.location.href = 'login.html';
+        } else {
+          alert('❌ ' + (result.error || 'Registration failed'));
+        }
+      } catch (error) {
+        alert('❌ Error connecting to server. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        updateSubmitButton();
+      }
+    });
+
+    // Initialize form state
+    updateSubmitButton();
+  </script>
+</body>
+</html>

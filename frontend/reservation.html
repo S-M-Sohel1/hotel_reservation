@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Room</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .sticky-booking { 
+      position: sticky; 
+      top: 10px; 
+      background: white; 
+      border: 2px solid #007bff; 
+      border-radius: 8px; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+    
+    .filters {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .filter-group label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #666;
+    }
+    
+    .filter-group select, .filter-group input {
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .room-card { 
+      border: 1px solid #ddd; 
+      padding: 15px; 
+      border-radius: 5px; 
+      cursor: pointer;
+      transition: all 0.3s;
+      height: fit-content;
+    }
+    .room-card:hover { 
+      background-color: #f0f0f0; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .room-card.selected { 
+      background-color: #e7f3ff; 
+      border-color: #007bff; 
+      border-width: 2px;
+    }
+    
+    .room-info { display: flex; justify-content: space-between; align-items: center; }
+    .room-type-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      margin-left: 8px;
+    }
+    .standard { background-color: #28a745; }
+    .deluxe { background-color: #17a2b8; }
+    .executive { background-color: #ffc107; color: #333; }
+    .suite { background-color: #dc3545; }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    
+    .page-btn.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    .page-btn:hover:not(.active) {
+      background: #f8f9fa;
+    }
+    
+    .form-group { margin: 15px 0; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 200px; }
+    .btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    .btn:hover { background-color: #0056b3; }
+    .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    .btn-success { background-color: #28a745; }
+    .btn-success:hover { background-color: #218838; }
+    
+    #loading { 
+      display: none; 
+      text-align: center; 
+      padding: 40px; 
+      color: #666;
+      font-size: 18px;
+    }
+    
+    .results-info {
+      margin: 10px 0;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h2>Room Reservation</h2>
+  
+  <!-- Sticky Booking Form (appears when room is selected) -->
+  <div id="stickyBooking" class="sticky-booking" style="display: none;">
+    <h3>🎯 Complete Your Booking</h3>
+    <form id="reservationForm">
+      <div style="display: flex; gap: 20px; align-items: end; flex-wrap: wrap;">
+        <div class="form-group">
+          <label>Selected Room:</label>
+          <input type="text" id="selectedRoomDisplay" readonly style="background: #f8f9fa;">
+          <input type="hidden" id="selectedRoomId" name="room_id" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Check-in Date:</label>
+          <input type="date" name="check_in" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Check-out Date:</label>
+          <input type="date" name="check_out" required>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">🏨 Book Now</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div id="loading">Loading available rooms...</div>
+  
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Room Type:</label>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="Standard">Standard (₹3,000)</option>
+        <option value="Deluxe">Deluxe (₹4,500)</option>
+        <option value="Executive">Executive (₹6,000)</option>
+        <option value="Suite">Suite (₹9,000)</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Floor:</label>
+      <select id="floorFilter">
+        <option value="">All Floors</option>
+        <option value="F1">Floor 1</option>
+        <option value="F2">Floor 2</option>
+        <option value="F3">Floor 3</option>
+        <option value="F4">Floor 4</option>
+        <option value="F5">Floor 5</option>
+        <option value="F6">Floor 6</option>
+        <option value="F7">Floor 7</option>
+        <option value="F8">Floor 8</option>
+        <option value="F9">Floor 9</option>
+        <option value="F10">Floor 10</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Search Room:</label>
+      <input type="text" id="searchRoom" placeholder="e.g. F101, F205...">
+    </div>
+    
+    <div class="filter-group">
+      <button type="button" class="btn" onclick="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+  
+  <div class="results-info" id="resultsInfo"></div>
+  
+  <div id="roomSelection">
+    <div class="rooms-grid" id="roomList"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <script>
+    let selectedRoom = null;
+    let allRooms = [];
+    let filteredRooms = [];
+    let currentPage = 1;
+    const roomsPerPage = 12;
+
+    // Load available rooms when page loads
+    async function loadAvailableRooms() {
+      const loading = document.getElementById('loading');
+      const roomList = document.getElementById('roomList');
+      
+      loading.style.display = 'block';
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/rooms', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          allRooms = await response.json();
+          filteredRooms = [...allRooms];
+          setupFilters();
+          displayRooms();
+        } else {
+          roomList.innerHTML = '<p>Error loading rooms. Please try again.</p>';
+        }
+      } catch (error) {
+        roomList.innerHTML = '<p>Error connecting to server. Please try again.</p>';
+      }
+      
+      loading.style.display = 'none';
+    }
+
+    // Setup filter event listeners
+    function setupFilters() {
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+      document.getElementById('floorFilter').addEventListener('change', applyFilters);
+      document.getElementById('searchRoom').addEventListener('input', applyFilters);
+    }
+
+    // Apply filters to rooms
+    function applyFilters() {
+      const typeFilter = document.getElementById('typeFilter').value;
+      const floorFilter = document.getElementById('floorFilter').value;
+      const searchFilter = document.getElementById('searchRoom').value.toLowerCase();
+
+      filteredRooms = allRooms.filter(room => {
+        const matchesType = !typeFilter || room.type_name === typeFilter;
+        const matchesFloor = !floorFilter || room.room_number.startsWith(floorFilter);
+        const matchesSearch = !searchFilter || 
+          room.room_number.toLowerCase().includes(searchFilter) ||
+          room.type_name.toLowerCase().includes(searchFilter);
+
+        return matchesType && matchesFloor && matchesSearch;
+      });
+
+      currentPage = 1;
+      displayRooms();
+    }
+
+    // Clear all filters
+    function clearFilters() {
+      document.getElementById('typeFilter').value = '';
+      document.getElementById('floorFilter').value = '';
+      document.getElementById('searchRoom').value = '';
+      filteredRooms = [...allRooms];
+      currentPage = 1;
+      displayRooms();
+    }
+
+    // Display rooms with pagination
+    function displayRooms() {
+      const roomList = document.getElementById('roomList');
+      const resultsInfo = document.getElementById('resultsInfo');
+      
+      if (filteredRooms.length === 0) {
+        roomList.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No rooms found matching your criteria.</p>';
+        resultsInfo.textContent = '';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredRooms.length / roomsPerPage);
+      const startIndex = (currentPage - 1) * roomsPerPage;
+      const endIndex = startIndex + roomsPerPage;
+      const currentRooms = filteredRooms.slice(startIndex, endIndex);
+
+      // Update results info
+      resultsInfo.textContent = `Showing ${startIndex + 1}-${Math.min(endIndex, filteredRooms.length)} of ${filteredRooms.length} rooms`;
+
+      // Display rooms
+      roomList.innerHTML = currentRooms.map(room => {
+        const badgeClass = room.type_name.toLowerCase();
+        return `
+          <div class="room-card" onclick="selectRoom(${room.room_id}, '${room.room_number}', '${room.type_name}', ${room.price})">
+            <div class="room-info">
+              <div>
+                <strong>Room ${room.room_number}</strong>
+                <span class="room-type-badge ${badgeClass}">${room.type_name}</span>
+                <br>
+                <span style="color: #666; font-size: 13px;">Floor ${room.room_number.charAt(1)} • Available</span>
+              </div>
+              <div style="text-align: right;">
+                <strong style="color: #007bff; font-size: 18px;">₹${room.price.toLocaleString()}</strong>
+                <br>
+                <span style="color: #666; font-size: 12px;">per night</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Display pagination
+      displayPagination(totalPages);
+    }
+
+    // Display pagination controls
+    function displayPagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+
+      let paginationHTML = '';
+      
+      // Previous button
+      if (currentPage > 1) {
+        paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">← Previous</button>`;
+      }
+
+      // Page numbers
+      for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        paginationHTML += `<button class="page-btn ${activeClass}" onclick="changePage(${i})">${i}</button>`;
+      }
+
+      // Next button
+      if (currentPage < totalPages) {
+        paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">Next →</button>`;
+      }
+
+      pagination.innerHTML = paginationHTML;
+    }
+
+    // Change page
+    function changePage(page) {
+      currentPage = page;
+      displayRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Handle room selection
+    function selectRoom(roomId, roomNumber, roomType, price) {
+      // Remove previous selection
+      document.querySelectorAll('.room-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      
+      // Mark current selection
+      event.target.closest('.room-card').classList.add('selected');
+      
+      // Store selected room
+      selectedRoom = { id: roomId, number: roomNumber, type: roomType, price: price };
+      
+      // Update sticky form
+      document.getElementById('selectedRoomId').value = roomId;
+      document.getElementById('selectedRoomDisplay').value = `Room ${roomNumber} (${roomType}) - ₹${price.toLocaleString()}/night`;
+      
+      // Show sticky booking form
+      document.getElementById('stickyBooking').style.display = 'block';
+      
+      // Smooth scroll to top to show the booking form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Handle form submission
+    document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!selectedRoom) {
+        alert('Please select a room first');
+        return;
+      }
+
+      const form = e.target;
+      const room_id = selectedRoom.id;
+      const check_in = form.check_in.value;
+      const check_out = form.check_out.value;
+
+      // Validate dates
+      const checkinDate = new Date(check_in);
+      const checkoutDate = new Date(check_out);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (checkinDate < today) {
+        alert('Check-in date cannot be in the past');
+        return;
+      }
+      
+      if (checkoutDate <= checkinDate) {
+        alert('Check-out date must be after check-in date');
+        return;
+      }
+
+      // Calculate nights and total cost
+      const nights = Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
+      const totalCost = nights * selectedRoom.price;
+
+      if (!confirm(`Confirm booking:\n\nRoom: ${selectedRoom.number} (${selectedRoom.type})\nDates: ${check_in} to ${check_out}\nNights: ${nights}\nTotal Cost: ₹${totalCost.toLocaleString()}\n\nProceed with booking?`)) {
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Booking...';
+
+      try {
+        const res = await fetch('http://localhost:3000/api/customer/reserve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            room_id,
+            check_in,
+            check_out
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert(`✅ Reservation confirmed!\n\nRoom ${selectedRoom.number} (${selectedRoom.type})\n${check_in} to ${check_out}\n${nights} nights • Total: ₹${totalCost.toLocaleString()}`);
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('❌ ' + (result.error || 'Reservation failed'));
+        }
+      } catch (error) {
+        alert('❌ Error connecting to server. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🏨 Book Now';
+      }
+    });
+
+    // Set minimum date to today
+    function setMinDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.querySelector('input[name="check_in"]').min = today;
+      document.querySelector('input[name="check_out"]').min = today;
+    }
+
+    // Initialize page
+    window.onload = function() {
+      setMinDate();
+      
+      // Check if user came from rooms page with a pre-selected room
+      const selectedRoomData = sessionStorage.getItem('selectedRoom');
+      if (selectedRoomData) {
+        const roomData = JSON.parse(selectedRoomData);
+        
+        // Pre-fill the dates if available
+        if (roomData.checkin) {
+          document.querySelector('input[name="check_in"]').value = roomData.checkin;
+        }
+        if (roomData.checkout) {
+          document.querySelector('input[name="check_out"]').value = roomData.checkout;
+        }
+        
+        // Pre-select the room
+        selectRoom(roomData.id, roomData.number, roomData.type, roomData.price);
+        
+        // Clear the session storage as we've used it
+        sessionStorage.removeItem('selectedRoom');
+        
+        // Scroll to booking form
+        setTimeout(() => {
+          document.querySelector('.booking-form-container').scrollIntoView({ 
+            behavior: 'smooth' 
+          });
+        }, 500);
+      }
+      
+      loadAvailableRooms();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Rooms - Grand Plaza Hotel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Arial', sans-serif; 
+      line-height: 1.6; 
+      color: #333; 
+      background: #f8f9fa;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+    
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links .btn-primary { background: #ff6b6b; }
+    .nav-links .btn-primary:hover { background: #ff5252; }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .page-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+    
+    .page-header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    /* Filters */
+    .filters {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .filter-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 150px;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+    }
+    
+    .filter-group select, .filter-group input {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .filter-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 1.5rem;
+    }
+    
+    .filter-btn:hover {
+      background: #0056b3;
+    }
+    
+    /* Room Grid */
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .room-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .room-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .room-image {
+      height: 200px;
+      background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      position: relative;
+    }
+    
+    .room-type-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .standard { background: #28a745; }
+    .deluxe { background: #17a2b8; }
+    .executive { background: #ffc107; color: #333; }
+    .suite { background: #dc3545; }
+    
+    .room-content {
+      padding: 1.5rem;
+    }
+    
+    .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .room-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .room-number {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .room-price {
+      text-align: right;
+    }
+    
+    .price-amount {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+    
+    .price-period {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .room-features {
+      margin: 1rem 0;
+    }
+    
+    .room-features ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .room-features li {
+      background: #f8f9fa;
+      padding: 0.3rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .book-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .book-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .no-rooms {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+    
+    .no-rooms h3 {
+      margin-bottom: 1rem;
+    }
+    
+    .login-prompt {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 1rem;
+      border-radius: 5px;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    
+    .login-prompt a {
+      color: #856404;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    
+    .login-prompt a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .rooms-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="nav-container">
+      <a href="index.html" class="logo">🏨 Grand Plaza Hotel</a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#rooms">Rooms</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+          <li><a href="login.html">Login</a></li>
+          <li><a href="register.html" class="btn-primary">Book Now</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Available Rooms</h1>
+      <p>Choose from our luxury accommodations</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Check-in Date</label>
+          <input type="date" id="checkinFilter">
+        </div>
+        
+        <div class="filter-group">
+          <label>Check-out Date</label>
+          <input type="date" id="checkoutFilter">
+        </div>
+        
+        <div class="filter-group">
+          <label>Room Type</label>
+          <select id="typeFilter">
+            <option value="">All Types</option>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Executive">Executive</option>
+            <option value="Suite">Suite</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Max Price</label>
+          <select id="priceFilter">
+            <option value="">Any Price</option>
+            <option value="3000">Up to ₹3,000</option>
+            <option value="4500">Up to ₹4,500</option>
+            <option value="6000">Up to ₹6,000</option>
+            <option value="9000">Up to ₹9,000</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <button class="filter-btn" onclick="loadRooms()">Search Rooms</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+      Loading available rooms...
+    </div>
+
+    <!-- Rooms Grid -->
+    <div id="roomsGrid" class="rooms-grid" style="display: none;"></div>
+
+    <!-- No Rooms Message -->
+    <div id="noRooms" class="no-rooms" style="display: none;">
+      <h3>No rooms available</h3>
+      <p>Try adjusting your search criteria or dates</p>
+    </div>
+
+    <!-- Login Prompt -->
+    <div class="login-prompt">
+      <p>💡 <strong>Ready to book?</strong> <a href="login.html">Sign in</a> or <a href="register.html">create an account</a> to complete your reservation.</p>
+    </div>
+  </div>
+
+  <script>
+    // Set default dates
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      
+      document.getElementById('checkinFilter').value = today;
+      document.getElementById('checkinFilter').min = today;
+      document.getElementById('checkoutFilter').value = tomorrowStr;
+      document.getElementById('checkoutFilter').min = tomorrowStr;
+      
+      // Update checkout min when checkin changes
+      document.getElementById('checkinFilter').addEventListener('change', function() {
+        const checkinDate = new Date(this.value);
+        checkinDate.setDate(checkinDate.getDate() + 1);
+        document.getElementById('checkoutFilter').min = checkinDate.toISOString().split('T')[0];
+      });
+      
+      // Check if coming from quick booking
+      const quickBooking = sessionStorage.getItem('quickBooking');
+      if (quickBooking) {
+        const data = JSON.parse(quickBooking);
+        document.getElementById('checkinFilter').value = data.checkin;
+        document.getElementById('checkoutFilter').value = data.checkout;
+        sessionStorage.removeItem('quickBooking');
+      }
+      
+      // Load rooms initially
+      loadRooms();
+    });
+
+    async function loadRooms() {
+      const loading = document.getElementById('loading');
+      const roomsGrid = document.getElementById('roomsGrid');
+      const noRooms = document.getElementById('noRooms');
+      
+      loading.style.display = 'block';
+      roomsGrid.style.display = 'none';
+      noRooms.style.display = 'none';
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/rooms');
+        
+        if (response.ok) {
+          const rooms = await response.json();
+          displayRooms(filterRooms(rooms));
+        } else {
+          throw new Error('Failed to load rooms');
+        }
+      } catch (error) {
+        roomsGrid.innerHTML = '<div class="loading">Error loading rooms. Please try again later.</div>';
+        roomsGrid.style.display = 'block';
+      }
+      
+      loading.style.display = 'none';
+    }
+
+    function filterRooms(rooms) {
+      const typeFilter = document.getElementById('typeFilter').value;
+      const priceFilter = document.getElementById('priceFilter').value;
+      
+      return rooms.filter(room => {
+        const matchesType = !typeFilter || room.type_name === typeFilter;
+        const matchesPrice = !priceFilter || room.price <= parseInt(priceFilter);
+        return matchesType && matchesPrice;
+      });
+    }
+
+    function displayRooms(rooms) {
+      const roomsGrid = document.getElementById('roomsGrid');
+      const noRooms = document.getElementById('noRooms');
+      
+      if (rooms.length === 0) {
+        noRooms.style.display = 'block';
+        return;
+      }
+
+      const roomFeatures = {
+        'Standard': ['WiFi', 'AC', 'TV', 'Room Service'],
+        'Deluxe': ['WiFi', 'AC', 'TV', 'Room Service', 'City View', 'Mini Bar'],
+        'Executive': ['WiFi', 'AC', 'TV', 'Room Service', 'City View', 'Mini Bar', 'Lounge Access'],
+        'Suite': ['WiFi', 'AC', 'TV', 'Room Service', 'City View', 'Mini Bar', 'Lounge Access', 'Butler Service']
+      };
+
+      roomsGrid.innerHTML = rooms.map(room => {
+        const badgeClass = room.type_name.toLowerCase();
+        const features = roomFeatures[room.type_name] || [];
+        const roomIcon = {
+          'Standard': '🛏️',
+          'Deluxe': '🏡', 
+          'Executive': '👔',
+          'Suite': '👑'
+        }[room.type_name] || '🏨';
+        
+        return `
+          <div class="room-card">
+            <div class="room-image">
+              ${roomIcon}
+              <div class="room-type-badge ${badgeClass}">${room.type_name}</div>
+            </div>
+            <div class="room-content">
+              <div class="room-header">
+                <div>
+                  <div class="room-title">${room.type_name} Room</div>
+                  <div class="room-number">Room ${room.room_number}</div>
+                </div>
+                <div class="room-price">
+                  <div class="price-amount">₹${room.price.toLocaleString()}</div>
+                  <div class="price-period">per night</div>
+                </div>
+              </div>
+              
+              <div class="room-features">
+                <ul>
+                  ${features.map(feature => `<li>${feature}</li>`).join('')}
+                </ul>
+              </div>
+              
+              <button class="book-btn" onclick="bookRoom(${room.room_id}, '${room.room_number}', '${room.type_name}', ${room.price})">
+                Select This Room
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      roomsGrid.style.display = 'grid';
+    }
+
+    function bookRoom(roomId, roomNumber, roomType, price) {
+      const checkin = document.getElementById('checkinFilter').value;
+      const checkout = document.getElementById('checkoutFilter').value;
+      
+      // Store selection and redirect to login/register
+      sessionStorage.setItem('selectedRoom', JSON.stringify({
+        id: roomId,
+        number: roomNumber,
+        type: roomType,
+        price: price,
+        checkin: checkin,
+        checkout: checkout
+      }));
+      
+      // Check if user is logged in by trying to access dashboard
+      fetch('http://localhost:3000/api/customer/dashboard', {
+        credentials: 'include'
+      }).then(response => {
+        if (response.ok) {
+          // User is logged in, go directly to reservation
+          window.location.href = 'reservation.html';
+        } else {
+          // User not logged in, redirect to login with message
+          alert('Please login or register to book this room');
+          window.location.href = 'login.html';
+        }
+      }).catch(() => {
+        // Error checking login status, assume not logged in
+        alert('Please login or register to book this room');
+        window.location.href = 'login.html';
+      });
+    }
+  </script>
+</body>
+</html>

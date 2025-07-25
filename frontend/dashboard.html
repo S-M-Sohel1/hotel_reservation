@@ -1,0 +1,144 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Customer Dashboard</title>
+</head>
+<body>
+  <h2>Welcome, <span id="custName"></span></h2>
+  
+  <!-- Logout button -->
+  <button onclick="logout()" style="float: right; margin-top: -40px;">Logout</button>
+  
+  <h3>Your Profile</h3>
+  <p>Email: <span id="custEmail"></span></p>
+  <p>Phone: <span id="custPhone"></span></p>
+
+  <!-- Book a Room Button -->
+  <a href="reservation.html"><button style="background-color: #4CAF50; color: white; padding: 10px 20px; margin: 10px 0; border: none; border-radius: 4px; cursor: pointer;">Book a Room</button></a>
+
+  <h3>Upcoming Reservations</h3>
+  <ul id="reservationList"></ul>
+
+  <script>
+    // ✅ No need to get customer ID - sessions handle authentication
+    fetch(`http://localhost:3000/api/customer/dashboard`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert('Please login first');
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        if (data.profile) {
+          document.getElementById('custName').innerText = data.profile.name || 'N/A';
+          document.getElementById('custEmail').innerText = data.profile.email || 'N/A';
+          document.getElementById('custPhone').innerText = data.profile.phone || 'N/A';
+        }
+
+        const list = document.getElementById('reservationList');
+        if (data.upcomingReservations && data.upcomingReservations.length > 0) {
+          data.upcomingReservations.forEach(r => {
+            const item = document.createElement('li');
+            
+            // ✅ Format dates to "01 May, 2025" format
+            const checkInDate = new Date(r.check_in);
+            const checkOutDate = new Date(r.check_out);
+            
+            const checkIn = checkInDate.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            });
+            
+            const checkOut = checkOutDate.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            });
+            
+            // Calculate hours until check-in for cancellation policy display
+            const currentDate = new Date();
+            const hoursUntilCheckIn = (checkInDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
+            
+            // Create reservation display with cancel button
+            item.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Room ${r.room_number} (${r.type_name}) • ${checkIn} to ${checkOut} • ₹${r.price}/night</span>
+                <button onclick="cancelReservation(${r.reservation_id}, ${hoursUntilCheckIn})" 
+                        style="background-color: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px;">
+                  Cancel
+                </button>
+              </div>
+            `;
+            
+            item.style.marginBottom = '5px';
+            item.style.padding = '10px';
+            item.style.backgroundColor = '#f0f8ff';
+            item.style.borderLeft = '3px solid #4CAF50';
+            list.appendChild(item);
+          });
+        } else {
+          const item = document.createElement('li');
+          item.textContent = 'No upcoming confirmed reservations';
+          item.style.fontStyle = 'italic';
+          item.style.color = '#666';
+          list.appendChild(item);
+        }
+      });
+
+    function logout() {
+      fetch('http://localhost:3000/api/customer/logout', {
+        method: 'POST'
+      })
+      .then(() => {
+        localStorage.removeItem('customerId');
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
+      })
+      .catch(() => {
+        // Even if logout fails, redirect to login
+        localStorage.removeItem('customerId');
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
+      });
+    }
+
+    function cancelReservation(reservationId, hoursUntilCheckIn) {
+      let policyMessage = '';
+      
+      if (hoursUntilCheckIn >= 48) {
+        policyMessage = 'FREE cancellation (more than 48 hours before check-in)';
+      } else if (hoursUntilCheckIn >= 0) {
+        policyMessage = 'ONE-NIGHT FEE will be charged (less than 48 hours before check-in)';
+      } else {
+        policyMessage = 'FULL RESERVATION will be charged (no-show cancellation)';
+      }
+
+      const confirmMessage = `Are you sure you want to cancel this reservation?\n\nCancellation Policy: ${policyMessage}\n\nClick OK to proceed.`;
+      
+      if (confirm(confirmMessage)) {
+        fetch('http://localhost:3000/api/customer/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservation_id: reservationId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            alert(data.message);
+            location.reload(); // Refresh to update the reservations list
+          } else {
+            alert(data.error || 'Cancellation failed');
+          }
+        })
+        .catch(err => {
+          alert('Error cancelling reservation');
+        });
+      }
+    }
+  </script>
+</body>
+</html>
